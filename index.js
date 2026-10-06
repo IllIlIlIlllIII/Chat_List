@@ -963,8 +963,6 @@ selectDeleteBtn.addEventListener('click', () => {
     renderChatList(container, filterInput.value.trim(), 0);
 });
     
-titleRow.appendChild(confirmDeleteBtn);
-titleRow.appendChild(selectDeleteBtn);
 
 const confirmDeleteBtn = document.createElement('button');
 confirmDeleteBtn.className = 'cm-action-btn cm-delete-btn cm-confirm-delete-btn hidden';
@@ -974,6 +972,14 @@ confirmDeleteBtn.addEventListener('click', async () => {
         toastr.warning(t`No chats selected.`);
         return;
     }
+
+    await renderChatList(container, filterInput.value.trim(), 0);
+});
+
+titleRow.appendChild(confirmDeleteBtn);
+titleRow.appendChild(selectDeleteBtn);
+
+const filterInput = document.createElement('input');
 
     const allChats = await fetchAllChats();
     const toDelete = allChats.filter(c => selectedChats.has(getChatKey(c)));
