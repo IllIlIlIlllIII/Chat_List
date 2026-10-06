@@ -1071,55 +1071,7 @@ const filterInput = document.createElement('input');
 filterInput.type = 'text';
 filterInput.id = 'cm-filter-input';
 filterInput.placeholder = t`Search by chat name...`;
-filterInput.className = 'cm-filter-input';
-
-    const allChats = await fetchAllChats();
-    const toDelete = allChats.filter(c => selectedChats.has(getChatKey(c)));
-    if (toDelete.length === 0) {
-    toastr.warning(t`No valid chats selected.`);
-    return;
-}
-// 현재 채팅은 반드시 마지막에 삭제한다.
-const orderedToDelete = [...toDelete].sort((a, b) => {
-    const aCurrent = isCurrentManagedChat(a);
-    const bCurrent = isCurrentManagedChat(b);
-
-    return Number(aCurrent) - Number(bCurrent);
-});
-    
-    const content = document.createElement('div');
-    content.innerHTML = '<h3>' + t`Delete selected chats?` + '</h3>';
-    const countMsg = document.createElement('p');
-    countMsg.textContent = toDelete.length + t` chats will be deleted.`;
-    countMsg.style.color = '#e74c3c';
-    countMsg.style.fontWeight = 'bold';
-    content.appendChild(countMsg);
-
-    const popup = new Popup(content, POPUP_TYPE.CONFIRM, '', {
-        okButton: t`Delete All`,
-        cancelButton: t`Cancel`
-    });
-    const result = await popup.show();
-    if (result !== POPUP_RESULT.AFFIRMATIVE) return;
-
-for (const chat of orderedToDelete) {
-    await deleteChat(chat);
-}
-
-    isSelectMode = false;
-    selectedChats.clear();
-    selectDeleteBtn.innerHTML = '<i class="fa-solid fa-check-square"></i> ' + t`Select`;
-    selectDeleteBtn.classList.remove('cm-select-mode-active');
-    confirmDeleteBtn.classList.add('hidden');
-    cachedChats = null;
-    await renderChatList(container, filterInput.value.trim(), 0);
-});
-
-const filterInput = document.createElement('input');
-filterInput.type = 'text';
-filterInput.id = 'cm-filter-input';
-filterInput.placeholder = t`Search by chat name...`;
-filterInput.className = 'cm-filter-input';    
+filterInput.className = 'cm-filter-input';  
     
 container.appendChild(titleRow);
     const filterRow = document.createElement('div');
