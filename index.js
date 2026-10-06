@@ -222,6 +222,138 @@ let isSelectMode = false;
 let selectedChats = new Set();
 
 // =========================
+// Auto Refresh
+// =========================
+
+let chatListRefreshTimer = null;
+let chatListRefreshRunning = false;
+
+/**
+ * Welcome 화면에 채팅 목록이 표시되고 있을 때만 새로고침한다.
+ * CHAT_CHANGED는 채팅 열기/닫기 모두 발생하므로,
+ * Welcome 화면이 아닐 때는 불필요한 API 요청을 하지 않는다.
+ */
+async function refreshChatListIfVisible() {
+    const container = document.getElementById('cm-container');
+
+    if (!container) {
+        return;
+    }
+
+    const welcomePanel = container.closest('.welcomePanel');
+
+    if (!welcomePanel) {
+        return;
+    }
+
+    // hidden 상태라면 갱신하지 않음
+    if (welcomePanel.offsetParent === null) {
+        return;
+    }
+
+    // 연속 이벤트가 들어오는 경우 한 번만 실행
+    clearTimeout(chatListRefreshTimer);
+
+    chatListRefreshTimer = setTimeout(async () => {
+        if (chatListRefreshRunning) {
+            return;
+        }
+
+        chatListRefreshRunning = true;
+
+        try {
+            const filterInput =
+                container.querySelector('#cm-filter-input') ??
+                container.querySelector('.cm-filter-input');
+
+            const filter =
+                filterInput?.value?.trim() ?? '';
+
+            // 기존 캐시 제거
+            cachedChats = null;
+
+            // 로딩 표시
+            const loader =
+                container.querySelector('#cm-loader');
+
+            if (loader) {
+                loader.classList.remove('hidden');
+            }
+
+            // 첫 페이지부터 다시 렌더링
+            await renderChatList(
+                container,
+                filter,
+                0,
+            );
+        } catch (error) {
+            console.error(
+                '[Chat_list] Auto refresh failed:',
+                error,
+            );
+        } finally {
+            chatListRefreshRunning = false;
+        }
+    }, 50);
+}
+
+/**
+ * SillyTavern 채팅 상태 변경 감지
+ *
+ * CHAT_CHANGED:
+ * - 채팅 열기
+ * - 채팅 닫기
+ * - 다른 채팅으로 전환
+ *
+ * CHAT_CREATED:
+ * - 새 채팅 생성
+ *
+ * CHAT_RENAMED / CHAT_DELETED:
+ * - 다른 기능에서 직접 변경된 경우도 반영
+ */
+function setupChatListAutoRefresh() {
+    if (
+        !eventSource ||
+        typeof eventSource.on !== 'function'
+    ) {
+        console.warn(
+            '[Chat_list] eventSource.on is not available.',
+        );
+        return;
+    }
+
+    eventSource.on(
+        event_types.CHAT_CHANGED,
+        refreshChatListIfVisible,
+    );
+
+    eventSource.on(
+        event_types.CHAT_CREATED,
+        refreshChatListIfVisible,
+    );
+
+    eventSource.on(
+        event_types.CHAT_RENAMED,
+        refreshChatListIfVisible,
+    );
+
+    eventSource.on(
+        event_types.CHAT_DELETED,
+        refreshChatListIfVisible,
+    );
+
+    eventSource.on(
+        event_types.GROUP_CHAT_CREATED,
+        refreshChatListIfVisible,
+    );
+
+    eventSource.on(
+        event_types.GROUP_CHAT_DELETED,
+        refreshChatListIfVisible,
+    );
+}
+
+// =========================
 // Concurrency Limiter
 // =========================
 // [FIX] 캐릭터/그룹 수만큼 무제한 동시 요청이 나가던 문제 해결
@@ -886,6 +1018,7 @@ titleRow.appendChild(confirmDeleteBtn);
 
 const filterInput = document.createElement('input');
 filterInput.type = 'text';
+filterInput.id = 'cm-filter-input';
 filterInput.placeholder = t`Search by chat name...`;
 filterInput.className = 'cm-filter-input';    
     
@@ -1075,6 +1208,8 @@ function renderExtensionSettings() {
 (function init() {
     const settings = getSettings();
     renderExtensionSettings();
-    if (settings.enabled === false) return;
+    if (settings.enabled === false) {
+        return;}
+    setupChatListAutoRefresh();
     setupWelcomePageObserver();
 })();
