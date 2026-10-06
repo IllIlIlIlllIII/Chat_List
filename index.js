@@ -962,6 +962,8 @@ selectDeleteBtn.addEventListener('click', () => {
     confirmDeleteBtn.classList.toggle('hidden', !isSelectMode);
     renderChatList(container, filterInput.value.trim(), 0);
 });
+    
+titleRow.appendChild(confirmDeleteBtn);
 titleRow.appendChild(selectDeleteBtn);
 
 const confirmDeleteBtn = document.createElement('button');
@@ -1014,7 +1016,6 @@ for (const chat of orderedToDelete) {
     cachedChats = null;
     await renderChatList(container, filterInput.value.trim(), 0);
 });
-titleRow.appendChild(confirmDeleteBtn);
 
 const filterInput = document.createElement('input');
 filterInput.type = 'text';
