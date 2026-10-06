@@ -1,5 +1,5 @@
 // =========================
-// Chat_list_test - SillyTavern Extension
+// Chat_list - SillyTavern Extension
 // Replace the Welcome Page "Recent Chats" with a full chat list.
 // List, rename, delete all chats — without entering them.
 // =========================
@@ -39,7 +39,7 @@ const {
     eventSource
 } = SillyTavern.getContext();
 
-const MODULE_NAME = 'Chat_list_test';
+const MODULE_NAME = 'Chat_list';
 const MAX_CHATS_PER_PAGE = 100;
 
 function formatFileSize(bytes) {
@@ -1036,7 +1036,7 @@ function renderExtensionSettings() {
     toggle.classList.add('inline-drawer-toggle', 'inline-drawer-header');
 
     const title = document.createElement('b');
-    title.textContent = 'Chat_list_test';
+    title.textContent = 'Chat_list';
     const icon = document.createElement('div');
     icon.classList.add('inline-drawer-icon', 'fa-solid', 'fa-circle-chevron-down', 'down');
     toggle.append(title, icon);
@@ -1054,7 +1054,7 @@ function renderExtensionSettings() {
         context.saveSettingsDebounced();
     });
     const span = document.createElement('span');
-    span.textContent = t`Enable Chat_list_test (needs reload)`;
+    span.textContent = t`Enable Chat_list (needs reload)`;
     label.append(checkbox, span);
     content.appendChild(label);
 
