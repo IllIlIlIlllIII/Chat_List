@@ -1,4 +1,4 @@
-// =========================
+chatListRefreshRunning = false;// =========================
 // Chat_list - SillyTavern Extension
 // Replace the Welcome Page "Recent Chats" with a full chat list.
 // List, rename, delete all chats — without entering them.
@@ -289,7 +289,7 @@ async function refreshChatListIfVisible() {
         } finally {
             chatListRefreshRunning = false;
         }
-    }, 30);
+    }, 15);
 }
 
 /**
